@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { open } from '@tauri-apps/api/dialog';
-import { invoke } from "@tauri-apps/api/tauri";
-import { readTextFile, writeTextFile } from "@tauri-apps/api/fs"
-import CryptoJS from "crypto-js";
+import { readBinaryFile, writeBinaryFile, exists } from "@tauri-apps/api/fs"
 import './styles/app.css'
+import AES from "./AES";
+import { writeText } from '@tauri-apps/api/clipboard';
 
 function App() {
 
@@ -14,10 +14,6 @@ function App() {
   const openFile = async () => {
     const selected = await open({
       multiple: false,
-      filters: [{
-        name: 'Text file',
-        extensions: ['txt']
-      }]
     });
 
     if (selected === null) {
@@ -26,29 +22,37 @@ function App() {
       setSelectedFile(selected)
     }
   }
-  const generateKey = () => {
-    const generatedKey = CryptoJS.lib.WordArray.random(32);
-
-    setEncryptionKey(generatedKey)
-  }
   const sendLog = (txt) => {
     setLog(txt)
     setTimeout(() => {
       setLog('')
     }, 3000);
   }
+  const generateKey = async () => {
+    const key = crypto.randomUUID();
+    setEncryptionKey(key);
+    await writeText(key);
+    sendLog("Key was copied to clipboard");
+  }
 
+  const secureFilePath = async (path) => {
+    var count = 0;
+    while(await exists(path)) 
+      path = `${path.split(".")[0]} (${count++}).${path.split(".").slice(1).join(".")}`;
+    return path;
+  }
 
   const handleEncrypt = async () => {
     if (!selectedFile) return setLog("No file selected");
     if (!encryptionKey) return setLog("No encryption key provided");
 
     try {
-      const fileContent = await readTextFile(selectedFile)
-      const cipherText = CryptoJS.AES.encrypt(fileContent, encryptionKey, { iv: 'rocketencryptxyz' }).toString();
+      const fileContent = await readBinaryFile(selectedFile)
+      const encryptedBytes = await AES.encrypt(fileContent, encryptionKey);
+      const destionationPath = selectedFile + ".rcktncrypt";
 
-      await writeTextFile(selectedFile, cipherText)
-      sendLog(`Successfully encrypted file ${selectedFile.split('\\')[selectedFile.split('\\').length - 1]}`)
+      await writeBinaryFile(await secureFilePath(destionationPath), encryptedBytes)
+      sendLog(`Successfully encrypted file ${destionationPath.slice(destionationPath.lastIndexOf("\\") + 1)}`)
       setSelectedFile('');
       setEncryptionKey('');
     } catch (error) {
@@ -59,15 +63,16 @@ function App() {
 
   const handleDecrypt = async () => {
     if (!selectedFile) return setLog("No file selected");
+    if (!selectedFile.endsWith(".rcktncrypt")) return setLog("File isn't a RocketEncrypt file");
     if (!encryptionKey) return setLog("No encryption key provided");
 
     try {
-      const fileContent = await readTextFile(selectedFile)
-      const bytes = CryptoJS.AES.decrypt(fileContent, encryptionKey)
-      const normalText = bytes.toString(CryptoJS.enc.Utf8)
+      const fileContent = await readBinaryFile(selectedFile)
+      const decryptedBytes = await AES.decrypt(fileContent, encryptionKey)
+      const destionationPath = selectedFile.split(".").slice(0, -1).join(".");
 
-      await writeTextFile(selectedFile, normalText)
-      sendLog(`Successfully decrypted file ${selectedFile.split('\\')[selectedFile.split('\\').length - 1]}`)
+      await writeBinaryFile(await secureFilePath(destionationPath), decryptedBytes)
+      sendLog(`Successfully decrypted file ${destionationPath.slice(destionationPath.lastIndexOf("\\") + 1)}`)
       setSelectedFile('');
       setEncryptionKey('');
     } catch (error) {
@@ -79,9 +84,7 @@ function App() {
   return (
     <div className="main">
       <h1>RocketEncrypt</h1>
-      <p>- The key must be 32 bytes</p>
-      <p>- Keep the key in a safe place</p>
-      <p>- Copy key before encrypt/decrypt</p>
+      <p>Remember to keep your key in a safe place</p>
       <div className="break" />
       <div className="input">
         <div className="icon">
@@ -102,7 +105,7 @@ function App() {
         <button onClick={handleEncrypt}>Encrypt</button>
         <button onClick={handleDecrypt}>Decrypt</button>
       </div>
-      <p>{log}</p>
+      <p className={`log ${log && " show"}`}>{log || <>&nbsp;</>}</p>
       {/* <input type="text" placeholder="Encryption key" /> */}
     </div>
   );
