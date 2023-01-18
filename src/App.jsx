@@ -37,14 +37,14 @@ function App() {
 
   const secureFilePath = async (path) => {
     var count = 0;
-    while(await exists(path)) 
+    while (await exists(path))
       path = `${path.split(".")[0]} (${count++}).${path.split(".").slice(1).join(".")}`;
     return path;
   }
 
   const handleEncrypt = async () => {
-    if (!selectedFile) return setLog("No file selected");
-    if (!encryptionKey) return setLog("No encryption key provided");
+    if (!selectedFile) return sendLog("No file selected");
+    if (!encryptionKey) return sendLog("No encryption key provided");
 
     try {
       const fileContent = await readBinaryFile(selectedFile)
@@ -56,15 +56,15 @@ function App() {
       setSelectedFile('');
       setEncryptionKey('');
     } catch (error) {
-      setLog('Some error occured')
+      sendLog('Some error occured')
       console.log(error)
     }
   }
 
   const handleDecrypt = async () => {
-    if (!selectedFile) return setLog("No file selected");
-    if (!selectedFile.endsWith(".rcktncrypt")) return setLog("File isn't a RocketEncrypt file");
-    if (!encryptionKey) return setLog("No encryption key provided");
+    if (!selectedFile) return sendLog("No file selected");
+    if (!selectedFile.endsWith(".rcktncrypt")) return sendLog("File isn't a RocketEncrypt file");
+    if (!encryptionKey) return sendLog("No encryption key provided");
 
     try {
       const fileContent = await readBinaryFile(selectedFile)
@@ -76,7 +76,7 @@ function App() {
       setSelectedFile('');
       setEncryptionKey('');
     } catch (error) {
-      setLog('Some error occured')
+      sendLog('Some error occured')
       console.log(error)
     }
   }
