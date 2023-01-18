@@ -1,6 +1,6 @@
 # RocketEncrypt
 
-App for encrypting and decrypting TXT files.
+App for encrypting and decrypting files.
 
 If you feel like you want to commit, go ahead
 
