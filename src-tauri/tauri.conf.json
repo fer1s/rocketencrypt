@@ -14,7 +14,11 @@
     "allowlist": {
       "all": true,
       "fs": {
-        "all": true
+        "all": true,
+        "scope": ["**/*"]
+      },
+      "clipboard": {
+        "writeText": true
       }
     },
     "bundle": {
@@ -61,7 +65,7 @@
         "fullscreen": false,
         "height": 280,
         "resizable": false,
-        "title": "rocketencrypt",
+        "title": "RocketEncrypt",
         "width": 450,
         "maxHeight": 280,
         "maxWidth": 450,

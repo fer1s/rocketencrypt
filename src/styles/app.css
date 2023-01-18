@@ -12,7 +12,7 @@
 .break {
     height: 1px;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .main h1 {
@@ -24,6 +24,15 @@
     font-size: 13px;
     font-weight: 200;
     color: rgba(255, 255, 255, 0.6);
+}
+
+.main p.log {
+    opacity: 0;
+    transition: 0.2s ease-in-out;
+}
+
+.main p.log.show {
+    opacity: 1;
 }
 
 .main .input {
@@ -100,7 +109,7 @@ button {
 }
 
 .main .buttons {
-    margin-top: 3px;
+    margin: 15px 0;
 }
 
 /* .main button {
