@@ -1,11 +1,13 @@
-# RocketEncrypt
+![rocket-encrypt](banner.png)
 
-App for encrypting and decrypting TXT files.
+Encrypt and decrypt your files with RocketEncrypt.
 
-If you feel like you want to commit, go ahead
+This app is built with [Tauri](https://tauri.app/) and [React.js](https://reactjs.org/).
 
-Built with Tauri, React.js and ❤
+## Preview
+
+![preview](preview.png)
 
 ## Author
 
-fer1s
+[fer1s](https://github.com/fer1s)
